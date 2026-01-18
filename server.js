@@ -4,6 +4,11 @@ import { neon } from '@neondatabase/serverless';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 dotenv.config({ path: '.env.local' });
 
@@ -15,6 +20,11 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-producti
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Serve static files from the dist directory in production
+if (process.env.NODE_ENV === 'production') {
+    app.use(express.static(join(__dirname, 'dist')));
+}
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -143,3 +153,10 @@ app.listen(PORT, () => {
     console.log(`Backend server running on http://localhost:${PORT}`);
     console.log(`API endpoints available at http://localhost:${PORT}/api/*`);
 });
+
+// Catch-all route - serve index.html for frontend routing (must be last)
+if (process.env.NODE_ENV === 'production') {
+    app.get('*', (req, res) => {
+        res.sendFile(join(__dirname, 'dist', 'index.html'));
+    });
+}
