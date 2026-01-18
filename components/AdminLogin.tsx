@@ -23,7 +23,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess, onCancel }) => 
 
       if (result && result.token) {
         // Save the token string, not the entire object
-        localStorage.setItem('admin_token', result.token);
+        localStorage.setItem('adminToken', result.token);
         onLoginSuccess(result.token);
       } else {
         setError('اسم المستخدم أو كلمة المرور غير صحيحة');

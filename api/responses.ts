@@ -54,7 +54,7 @@ export async function saveResponse(
 
 export async function getAllResponses(): Promise<SurveyResponse[]> {
   try {
-    const token = localStorage.getItem('admin_token');
+    const token = localStorage.getItem('adminToken');
     if (!token) {
       throw new Error('No authentication token');
     }
@@ -85,7 +85,7 @@ export async function getAllResponses(): Promise<SurveyResponse[]> {
 
 export async function deleteAllResponses(): Promise<boolean> {
   try {
-    const token = localStorage.getItem('admin_token');
+    const token = localStorage.getItem('adminToken');
     if (!token) {
       throw new Error('No authentication token');
     }

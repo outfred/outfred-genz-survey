@@ -24,7 +24,7 @@ const App: React.FC = () => {
     document.documentElement.lang = language;
 
     // Check if admin is already logged in
-    const token = localStorage.getItem('admin_token');
+    const token = localStorage.getItem('adminToken');
     if (token) {
       verifyAdminToken(token).then((isValid) => {
         // If navigating to /admin path and user is authenticated
@@ -47,13 +47,13 @@ const App: React.FC = () => {
       const isValid = await verifyToken(token);
       setIsAuthenticated(isValid);
       if (!isValid) {
-        localStorage.removeItem('admin_token');
+        localStorage.removeItem('adminToken');
       }
       return isValid;
     } catch (err) {
       console.error('Token verification failed:', err);
       setIsAuthenticated(false);
-      localStorage.removeItem('admin_token');
+      localStorage.removeItem('adminToken');
       return false;
     }
   };
