@@ -302,16 +302,18 @@ const App: React.FC = () => {
                 ) : (
                   <button
                     type="submit"
-                    disabled={!isComplete}
+                    disabled={!isComplete || isSubmitting}
                     className={`
                         flex-1 px-8 py-3 rounded-lg font-bold shadow-lg transition-all duration-300 transform
-                        ${isComplete
+                        ${isComplete && !isSubmitting
                         ? 'bg-gradient-to-r from-primary to-pink-600 text-white hover:translate-y-[-2px] hover:shadow-primary/30'
                         : 'bg-muted text-muted-foreground cursor-not-allowed opacity-70'}
                         ${isAr ? 'font-arabic' : 'font-sans'}
                       `}
                   >
-                    {isAr ? 'يالا بينا! 🚀' : 'Yalla Bina! 🚀'}
+                    {isSubmitting
+                      ? (isAr ? 'جاري الإرسال...' : 'Submitting...')
+                      : (isAr ? 'يلا بينا! 🚀' : 'Let\'s Go! 🚀')}
                   </button>
                 )}
               </div>
