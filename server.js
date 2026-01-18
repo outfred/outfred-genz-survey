@@ -155,8 +155,9 @@ app.listen(PORT, () => {
 });
 
 // Catch-all route - serve index.html for frontend routing (must be last)
+// Using middleware approach for Express 5 compatibility
 if (process.env.NODE_ENV === 'production') {
-    app.get('(.*)', (req, res) => {
+    app.use((req, res) => {
         res.sendFile(join(__dirname, 'dist', 'index.html'));
     });
 }
