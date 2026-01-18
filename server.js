@@ -157,7 +157,14 @@ app.listen(PORT, () => {
 // Catch-all route - serve index.html for frontend routing (must be last)
 // Using middleware approach for Express 5 compatibility
 if (process.env.NODE_ENV === 'production') {
-    app.use((req, res) => {
+    app.use((req, res, next) => {
+        // Skip if it's an API route, asset, or has a file extension
+        if (req.path.startsWith('/api/') ||
+            req.path.startsWith('/assets/') ||
+            req.path.match(/\.\w+$/)) {
+            return next();
+        }
+        // Serve index.html for client-side routes
         res.sendFile(join(__dirname, 'dist', 'index.html'));
     });
 }
