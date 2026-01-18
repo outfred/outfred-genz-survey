@@ -156,7 +156,7 @@ app.listen(PORT, () => {
 
 // Catch-all route - serve index.html for frontend routing (must be last)
 if (process.env.NODE_ENV === 'production') {
-    app.get('*', (req, res) => {
+    app.get('(.*)', (req, res) => {
         res.sendFile(join(__dirname, 'dist', 'index.html'));
     });
 }
