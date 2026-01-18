@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Animation Keyframes */
+@keyframes blob {
+
+    0%,
+    100% {
+        transform: translate(0, 0) scale(1);
+    }
+
+    33% {
+        transform: translate(30px, -50px) scale(1.1);
+    }
+
+    66% {
+        transform: translate(-20px, 20px) scale(0.9);
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-blob {
+    animation: blob 7s infinite;
+}
+
+.animation-delay-2000 {
+    animation-delay: 2s;
+}
+
+.animate-slideUp {
+    animation: slideUp 0.5s ease-out forwards;
+}
+
+/* Selection styles */
+::selection {
+    background: hsl(var(--primary) / 0.3);
+    color: hsl(var(--foreground));
+}
+
+@layer utilities {
+    .safe-area-bottom {
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    /* Mobile optimization for inputs */
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    select,
+    textarea {
+        font-size: 16px !important;
+        /* Prevents auto-zoom on iOS */
+    }
+}
+
+/* Custom scrollbar hide for clean mobile feel if needed */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}

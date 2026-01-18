@@ -13,6 +13,7 @@ const App: React.FC = () => {
   const [mounted, setMounted] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
@@ -20,15 +21,26 @@ const App: React.FC = () => {
     // Update HTML dir based on language
     document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
     document.documentElement.lang = language;
-    
+
     // Check if admin is already logged in
     const token = localStorage.getItem('admin_token');
     if (token) {
-      verifyAdminToken(token);
+      verifyAdminToken(token).then((isValid) => {
+        // If navigating to /admin path and user is authenticated
+        if (window.location.pathname === '/admin' && isValid) {
+          setShowAdmin(true);
+          setShowLogin(false);
+        }
+      });
+    } else {
+      // No token, check if navigating to /admin path
+      if (window.location.pathname === '/admin') {
+        setShowLogin(true);
+      }
     }
   }, [language]);
 
-  const verifyAdminToken = async (token: string) => {
+  const verifyAdminToken = async (token: string): Promise<boolean> => {
     try {
       const { verifyToken } = await import('./api/auth');
       const isValid = await verifyToken(token);
@@ -36,10 +48,12 @@ const App: React.FC = () => {
       if (!isValid) {
         localStorage.removeItem('admin_token');
       }
+      return isValid;
     } catch (err) {
       console.error('Token verification failed:', err);
       setIsAuthenticated(false);
       localStorage.removeItem('admin_token');
+      return false;
     }
   };
 
@@ -58,26 +72,18 @@ const App: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
+    // Extract name and phone from answers
+    const name = answers['name'] || '';
+    const phone = answers['phone'] || '';
+
     // Save to database
     try {
       const { saveResponse } = await import('./api/responses');
-      const success = await saveResponse(answers);
-      
+      const success = await saveResponse(answers, name, phone);
+
       if (!success) {
         console.error('Failed to save response to database');
-        // Fallback to localStorage
-        const responseData = {
-          timestamp: new Date().toISOString(),
-          answers: answers
-        };
-        try {
-          const existing = JSON.parse(localStorage.getItem('outfred_survey_responses') || '[]');
-          existing.push(responseData);
-          localStorage.setItem('outfred_survey_responses', JSON.stringify(existing));
-        } catch (error) {
-          console.error("Failed to save response locally", error);
-        }
       }
     } catch (error) {
       console.error("Failed to save response", error);
@@ -108,10 +114,19 @@ const App: React.FC = () => {
   if (showAdmin && isAuthenticated) {
     return (
       <AdminPanel
-        onClose={() => setShowAdmin(false)}
+        onClose={() => {
+          setShowAdmin(false);
+          // Navigate to home if came from /admin route
+          if (window.location.pathname === '/admin') {
+            window.history.pushState({}, '', '/');
+          }
+        }}
         onLogout={() => {
           setIsAuthenticated(false);
           setShowAdmin(false);
+          if (window.location.pathname === '/admin') {
+            window.history.pushState({}, '', '/');
+          }
         }}
       />
     );
@@ -140,7 +155,7 @@ const App: React.FC = () => {
           <p className={`text-lg text-muted-foreground leading-relaxed ${isAr ? 'font-arabic' : 'font-sans'}`}>
             {isAr ? SURVEY_CONTENT.outro.bodyAr : SURVEY_CONTENT.outro.bodyFr}
           </p>
-          <button 
+          <button
             onClick={() => window.location.reload()}
             className="mt-8 px-6 py-3 bg-primary text-primary-foreground rounded-lg font-bold hover:opacity-90 transition-opacity"
           >
@@ -166,10 +181,10 @@ const App: React.FC = () => {
       <main className="relative z-10 max-w-3xl mx-auto px-4 pt-8">
         {/* Header */}
         <div className="flex flex-col items-center justify-center space-y-6 mb-10">
-          <img 
-            src="https://www.outfred.fit/logo.webp?v=default" 
-            alt="Outfred Logo" 
-            className="h-12 object-contain dark:invert filter" 
+          <img
+            src="/logo.png"
+            alt="Outfred Logo"
+            className="h-12 object-contain"
           />
           <LanguageToggle mode={language} setMode={setLanguage} />
         </div>
@@ -185,78 +200,106 @@ const App: React.FC = () => {
         </div>
 
         {/* Survey Form */}
-        <form onSubmit={handleSubmit} className="space-y-12">
-          {SURVEY_CONTENT.sections.map((section, index) => (
-            <div key={section.id} className="animate-slideUp" style={{ animationDelay: `${index * 100}ms` }}>
-              <div className="flex items-center gap-3 mb-6">
-                <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground font-bold text-sm">
-                  {index + 1}
-                </span>
-                <h2 className={`text-2xl font-bold text-foreground ${isAr ? 'font-arabic' : 'font-sans'}`}>
-                  {isAr ? section.titleAr : section.titleFr}
-                </h2>
+        <form onSubmit={handleSubmit} className="space-y-8 relative pb-24">
+          <div className="animate-slideUp">
+            <div className="flex items-center gap-3 mb-6">
+              <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground font-bold text-sm">
+                {currentStep + 1}
+              </span>
+              <h2 className={`text-2xl font-bold text-foreground ${isAr ? 'font-arabic' : 'font-sans'}`}>
+                {isAr ? SURVEY_CONTENT.sections[currentStep].titleAr : SURVEY_CONTENT.sections[currentStep].titleFr}
+              </h2>
+            </div>
+
+            <div className="space-y-6">
+              {SURVEY_CONTENT.sections[currentStep].questions.map((question) => (
+                <QuestionCard
+                  key={question.id}
+                  question={question}
+                  language={language}
+                  selectedOption={answers[question.id] || null}
+                  onSelect={handleSelect}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Navigation & Submit Action */}
+          <div className="fixed bottom-0 left-0 right-0 z-50 p-4 bg-gradient-to-t from-background via-background/95 to-transparent">
+            <div className="max-w-3xl mx-auto glass-panel p-4 rounded-xl shadow-2xl flex flex-col gap-4 backdrop-blur-xl bg-background/80 border-primary/20">
+              {/* Progress Bar */}
+              <div className="w-full">
+                <div className="flex justify-between text-xs mb-2 px-1">
+                  <span className="text-muted-foreground font-semibold">
+                    {isAr ? 'التقدم' : 'Progress'}
+                  </span>
+                  <span className="text-primary font-bold">{progress}%</span>
+                </div>
+                <div className="h-3 w-full bg-secondary rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-primary transition-all duration-500 ease-out"
+                    style={{ width: `${progress}%` }}
+                  ></div>
+                </div>
               </div>
-              
-              <div className="space-y-6">
-                {section.questions.map((question) => (
-                  <QuestionCard
-                    key={question.id}
-                    question={question}
-                    language={language}
-                    selectedOption={answers[question.id] || null}
-                    onSelect={handleSelect}
-                  />
-                ))}
+
+              {/* Buttons */}
+              <div className="flex items-center gap-3">
+                {currentStep > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCurrentStep(prev => prev - 1);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    className={`flex-1 px-6 py-3 rounded-lg font-bold border-2 border-primary/20 hover:bg-primary/5 transition-colors ${isAr ? 'font-arabic' : 'font-sans'}`}
+                  >
+                    {isAr ? 'السابق' : 'Previous'}
+                  </button>
+                )}
+
+                {currentStep < SURVEY_CONTENT.sections.length - 1 ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                      setCurrentStep(prev => prev + 1);
+                    }}
+                    className={`flex-1 px-6 py-3 bg-primary text-primary-foreground rounded-lg font-bold shadow-lg hover:opacity-90 transition-all ${isAr ? 'font-arabic' : 'font-sans'}`}
+                  >
+                    {isAr ? 'التالي' : 'Next'}
+                  </button>
+                ) : (
+                  <button
+                    type="submit"
+                    disabled={!isComplete}
+                    className={`
+                        flex-1 px-8 py-3 rounded-lg font-bold shadow-lg transition-all duration-300 transform
+                        ${isComplete
+                        ? 'bg-gradient-to-r from-primary to-pink-600 text-white hover:translate-y-[-2px] hover:shadow-primary/30'
+                        : 'bg-muted text-muted-foreground cursor-not-allowed opacity-70'}
+                        ${isAr ? 'font-arabic' : 'font-sans'}
+                      `}
+                  >
+                    {isAr ? 'يالا بينا! 🚀' : 'Yalla Bina! 🚀'}
+                  </button>
+                )}
               </div>
             </div>
-          ))}
-
-          {/* Submit Action */}
-          <div className="sticky bottom-4 z-50">
-             <div className="glass-panel p-4 rounded-xl shadow-2xl flex flex-col md:flex-row items-center justify-between gap-4 backdrop-blur-xl bg-background/80 border-primary/20">
-                <div className="w-full md:w-1/2">
-                   <div className="flex justify-between text-xs mb-2 px-1">
-                      <span className="text-muted-foreground font-semibold">
-                        {isAr ? 'التقدم' : 'Progress'}
-                      </span>
-                      <span className="text-primary font-bold">{progress}%</span>
-                   </div>
-                   <div className="h-3 w-full bg-secondary rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-primary transition-all duration-500 ease-out"
-                        style={{ width: `${progress}%` }}
-                      ></div>
-                   </div>
-                </div>
-                
-                <button
-                  type="submit"
-                  disabled={!isComplete}
-                  className={`
-                    w-full md:w-auto px-8 py-3 rounded-lg font-bold shadow-lg transition-all duration-300 transform
-                    ${isComplete 
-                      ? 'bg-primary text-primary-foreground hover:translate-y-[-2px] hover:shadow-primary/30' 
-                      : 'bg-muted text-muted-foreground cursor-not-allowed opacity-70'}
-                    ${isAr ? 'font-arabic' : 'font-sans'}
-                  `}
-                >
-                  {isAr ? 'يالا بينا! 🚀' : 'Yalla Bina! 🚀'}
-                </button>
-             </div>
           </div>
         </form>
       </main>
-      
+
       <footer className="mt-20 py-8 text-center text-sm text-muted-foreground">
         <p>&copy; {new Date().getFullYear()} Outfred. All rights reserved.</p>
-        <button 
+        <button
           onClick={() => {
             if (isAuthenticated) {
               setShowAdmin(true);
             } else {
               setShowLogin(true);
             }
-          }} 
+          }}
           className="mt-4 text-xs opacity-30 hover:opacity-100 transition-opacity"
         >
           {isAuthenticated ? 'Admin Panel' : 'Admin Login'}

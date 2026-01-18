@@ -19,11 +19,12 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess, onCancel }) => 
     try {
       // Import auth function dynamically
       const { loginAdmin } = await import('../api/auth');
-      const token = await loginAdmin(username, password);
+      const result = await loginAdmin(username, password);
 
-      if (token) {
-        localStorage.setItem('admin_token', token);
-        onLoginSuccess(token);
+      if (result && result.token) {
+        // Save the token string, not the entire object
+        localStorage.setItem('admin_token', result.token);
+        onLoginSuccess(result.token);
       } else {
         setError('اسم المستخدم أو كلمة المرور غير صحيحة');
       }
@@ -41,7 +42,7 @@ const AdminLogin: React.FC<AdminLoginProps> = ({ onLoginSuccess, onCancel }) => 
         <h2 className="text-2xl font-bold text-center mb-6 text-foreground font-arabic">
           تسجيل دخول الإدارة
         </h2>
-        
+
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label className="block text-sm font-medium text-muted-foreground mb-2 font-arabic">

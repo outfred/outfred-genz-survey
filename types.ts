@@ -8,10 +8,10 @@ export interface Option {
 
 export interface Question {
   id: string;
-  type: 'radio' | 'checkbox';
+  type: 'radio' | 'checkbox' | 'text';
   questionAr: string;
   questionFr: string;
-  options: Option[];
+  options?: Option[];
 }
 
 export interface Section {

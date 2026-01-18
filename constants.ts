@@ -9,6 +9,25 @@ export const SURVEY_CONTENT: SurveyData = {
   },
   sections: [
     {
+      id: "contact",
+      titleAr: "بياناتك يا جميل 😉",
+      titleFr: "Bayanatak Ya Gameel 😉",
+      questions: [
+        {
+          id: "name",
+          type: "text",
+          questionAr: "اسمك إيه؟",
+          questionFr: "Esmak eh?",
+        },
+        {
+          id: "phone",
+          type: "text",
+          questionAr: "رقم موبايلك (عشان نبعتلك المفاجآت)",
+          questionFr: "Raqam mobilek (3ashan neb3atlak el mofag2at)",
+        }
+      ]
+    },
+    {
       id: "basics",
       titleAr: "البيانات الأساسية",
       titleFr: "El Bayanat El Asaseya",

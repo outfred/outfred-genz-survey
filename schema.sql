@@ -12,6 +12,8 @@ CREATE TABLE IF NOT EXISTS admins (
 -- Table for survey responses
 CREATE TABLE IF NOT EXISTS survey_responses (
     id SERIAL PRIMARY KEY,
+    name VARCHAR(255),
+    phone VARCHAR(50),
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     answers JSONB NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP

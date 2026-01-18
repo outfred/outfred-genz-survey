@@ -1,5 +1,5 @@
-import { neon } from '@neondatabase/serverless';
+// Placeholder for database connection
+// This file is kept for compatibility but not used in browser-only mode
+// For production, set up a proper backend server
 
-const sql = neon(process.env.DATABASE_URL || '');
-
-export default sql;
+export default null;
