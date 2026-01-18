@@ -95,7 +95,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onLogout }) => {
       const q = section.questions.find(q => q.id === qid);
       if (q && q.options) {
         const option = q.options.find(opt => opt.id === answerId);
-        if (option) return option.labelAr; // Arabic answer
+        if (option) return option.textAr; // Use textAr not labelAr
       }
     }
     return answerId; // fallback to ID if not found
