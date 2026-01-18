@@ -70,6 +70,26 @@ const App: React.FC = () => {
     return Math.round((answeredCount / totalQuestions) * 100);
   };
 
+  const handleNextStep = () => {
+    // Get current section questions
+    const currentSection = SURVEY_CONTENT.sections[currentStep];
+    const unansweredQuestions = currentSection.questions.filter(
+      q => !answers[q.id]
+    );
+
+    if (unansweredQuestions.length > 0) {
+      // Show alert with unanswered question
+      const firstUnanswered = unansweredQuestions[0];
+      const questionText = language === 'ar' ? firstUnanswered.questionAr : firstUnanswered.questionFr;
+      alert(`${language === 'ar' ? 'من فضلك أجب على السؤال: ' : 'Please answer: '}${questionText}`);
+      return;
+    }
+
+    // All questions answered, move to next step
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setCurrentStep(prev => prev + 1);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -261,10 +281,7 @@ const App: React.FC = () => {
                 {currentStep < SURVEY_CONTENT.sections.length - 1 ? (
                   <button
                     type="button"
-                    onClick={() => {
-                      window.scrollTo({ top: 0, behavior: 'smooth' });
-                      setCurrentStep(prev => prev + 1);
-                    }}
+                    onClick={handleNextStep}
                     className={`flex-1 px-6 py-3 bg-primary text-primary-foreground rounded-lg font-bold shadow-lg hover:opacity-90 transition-all ${isAr ? 'font-arabic' : 'font-sans'}`}
                   >
                     {isAr ? 'التالي' : 'Next'}
