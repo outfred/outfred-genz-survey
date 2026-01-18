@@ -10,6 +10,7 @@ const App: React.FC = () => {
   const [language, setLanguage] = useState<Language>('ar');
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
@@ -93,6 +94,11 @@ const App: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Prevent duplicate submissions
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
+
     // Extract name and phone from answers
     const name = answers['name'] || '';
     const phone = answers['phone'] || '';
@@ -104,16 +110,23 @@ const App: React.FC = () => {
 
       if (!success) {
         console.error('Failed to save response to database');
+        alert(language === 'ar' ? 'فشل حفظ الاستبيان. حاول مرة أخرى.' : 'Failed to save survey. Please try again.');
+        setIsSubmitting(false);
+        return;
       }
     } catch (error) {
       console.error("Failed to save response", error);
+      alert(language === 'ar' ? 'فشل حفظ الاستبيان. حاول مرة أخرى.' : 'Failed to save survey. Please try again.');
+      setIsSubmitting(false);
+      return;
     }
 
-    // Simulate submission loading
+    // Show success - simulate brief loading for UX
     setTimeout(() => {
+      setIsSubmitting(false);
       setIsSubmitted(true);
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, 600);
+    }, 500);
   };
 
   if (!mounted) return null;

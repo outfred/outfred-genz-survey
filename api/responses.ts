@@ -1,7 +1,7 @@
 // Auto-detect API URL based on environment
 const API_URL = window.location.hostname === 'localhost'
   ? 'http://localhost:3001'
-  : `${window.location.protocol}//${window.location.hostname}:3001`;
+  : '';  // Empty = same origin (production)
 
 export interface SurveyResponse {
   id?: number;
