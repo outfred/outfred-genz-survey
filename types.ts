@@ -4,6 +4,8 @@ export interface Option {
   id: string;
   textAr: string;
   textFr: string;
+  labelAr: string;  // For admin panel display
+  labelFr: string;  // For admin panel display
 }
 
 export interface Question {
