@@ -122,6 +122,12 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onLogout }) => {
             className="px-4 py-2 bg-secondary text-foreground rounded-lg text-sm font-medium hover:bg-secondary/80 transition-colors"
           >
             Close
+          </button>
+        </div>
+      </div>
+
+      {/* Table Content */}
+      <div className="flex-1 overflow-auto p-4">
         {loading ? (
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
@@ -139,26 +145,19 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onLogout }) => {
             </div>
           </div>
         ) : (
-            </button>
-        </div>
-      </div>
-
-      {/* Table Content */}
-      <div className="flex-1 overflow-auto p-4">
-        <div className="border border-border rounded-lg overflow-hidden">
-          <table className="w-full text-sm text-left">
-            <thead className="bg-secondary/50 text-foreground font-medium">
-              <tr>
-                <th className="p-3 border-b border-border whitespace-nowrap sticky top-0 bg-card z-10">Time</th>
-                {SURVEY_CONTENT.sections.flatMap(s => s.questions).map(q => (
-                  <th key={q.id} className="p-3 border-b border-border min-w-[150px] whitespace-nowrap sticky top-0 bg-card z-10" title={q.questionFr}>
-                    {q.questionAr.length > 30 ? q.questionAr.substring(0, 30) + '...' : q.questionAr}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-        )}
+          <div className="border border-border rounded-lg overflow-hidden">
+            <table className="w-full text-sm text-left">
+              <thead className="bg-secondary/50 text-foreground font-medium">
+                <tr>
+                  <th className="p-3 border-b border-border whitespace-nowrap sticky top-0 bg-card z-10">Time</th>
+                  {SURVEY_CONTENT.sections.flatMap(s => s.questions).map(q => (
+                    <th key={q.id} className="p-3 border-b border-border min-w-[150px] whitespace-nowrap sticky top-0 bg-card z-10" title={q.questionFr}>
+                      {q.questionAr.length > 30 ? q.questionAr.substring(0, 30) + '...' : q.questionAr}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
               {responses.length === 0 ? (
                 <tr>
                   <td colSpan={100} className="p-8 text-center text-muted-foreground">
@@ -179,9 +178,10 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onClose, onLogout }) => {
                   </tr>
                 ))
               )}
-            </tbody>
-          </table>
-        </div>
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

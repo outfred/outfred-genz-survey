@@ -36,7 +36,7 @@ git commit -m "Initial commit: Outfred Gen-Z Survey with Neon DB integration"
 
 # اربط المشروع بالـ repository
 git branch -M main
-git remote add origin https://github.com/YOUR-USERNAME/outfred-genz-survey.git
+git remote add origin https://github.com/outfred/outfred-genz-survey.git
 
 # ارفع الكود
 git push -u origin main
